@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "metadata": {
+    "id": "shore.preset.supabase-node-rag",
+    "name": "Supabase Node RAG",
+    "description": "Overview: A Next.js and Supabase pgvector RAG backend that isolates secrets, retrieval, and providers behind server modules.\nWhen to avoid: Avoid for sophisticated multi-tenant authorization, streaming ingestion, or long-running background workflows.\nLayers: Client UI, route handlers, server modules, shared types, generated database types, and seed tooling.",
+    "revision": "1.0.0"
+  },
+  "modules": {
+    "pathMappings": {
+      "client": [
+        "app/(ui)/**/*.{ts,tsx}",
+        "app/**/components/**/*.{ts,tsx}",
+        "lib/shared/**/*.ts"
+      ],
+      "server": [
+        "lib/server/**/*.ts"
+      ],
+      "server-only": [
+        "server-only"
+      ],
+      "supabase-sdk": [
+        "@supabase/supabase-js"
+      ],
+      "api-routes": [
+        "app/api/**/*.ts"
+      ]
+    },
+    "allowedEdges": [
+      {
+        "from": "api-routes",
+        "to": "server"
+      }
+    ],
+    "forbiddenEdges": [
+      {
+        "from": "client",
+        "to": "server"
+      },
+      {
+        "from": "client",
+        "to": "server-only"
+      },
+      {
+        "from": "client",
+        "to": "supabase-sdk"
+      }
+    ]
+  },
+  "rules": [
+    {
+      "ruleId": "architecture.client-imports-server",
+      "kind": "import-boundary",
+      "scope": {
+        "paths": [
+          "app/(ui)/**/*.{ts,tsx}",
+          "app/**/components/**/*.{ts,tsx}",
+          "lib/shared/**/*.ts"
+        ],
+        "modules": [
+          "client",
+          "server",
+          "server-only"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "Client code crosses the server-only boundary by importing a server module or marker.",
+      "remediation": "Expose the operation through an API route and keep the implementation in lib/server.",
+      "adoptionStage": "enforce"
+    },
+    {
+      "ruleId": "architecture.client-imports-supabase-sdk",
+      "kind": "import-boundary",
+      "scope": {
+        "paths": [
+          "app/(ui)/**/*.{ts,tsx}",
+          "app/**/components/**/*.{ts,tsx}",
+          "lib/shared/**/*.ts"
+        ],
+        "modules": [
+          "client",
+          "supabase-sdk"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "Client code crosses the data-access boundary by importing the Supabase SDK directly.",
+      "remediation": "Call a Route Handler and keep Supabase access in a server module.",
+      "adoptionStage": "enforce"
+    }
+  ]
+}

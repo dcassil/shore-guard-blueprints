@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "metadata": {
+    "id": "shore.preset.supabase-api",
+    "name": "Supabase API",
+    "description": "Overview: A database-as-API backend with isolated Deno Edge Functions and shared utilities.\nWhen to avoid: Avoid when domain logic is too heavy for SQL and thin edge shims, or when long-running jobs are central.\nLayers: Database schema and RLS, RPCs, isolated Edge Functions, shared function utilities, and generated types.",
+    "revision": "1.0.0"
+  },
+  "modules": {
+    "pathMappings": {
+      "edge-functions": [
+        "supabase/functions/!(_shared)/**/*.ts"
+      ],
+      "shared-function-code": [
+        "supabase/functions/_shared/**/*.ts"
+      ],
+      "sibling-function-internals": [
+        "../*/index.ts",
+        "../*/handler.ts",
+        "../**/functions/*/!(_shared)/**"
+      ],
+      "generated-types": [
+        "types/database.ts",
+        "types/database.types.ts"
+      ]
+    },
+    "allowedEdges": [
+      {
+        "from": "edge-functions",
+        "to": "shared-function-code"
+      }
+    ],
+    "forbiddenEdges": [
+      {
+        "from": "edge-functions",
+        "to": "sibling-function-internals"
+      }
+    ]
+  },
+  "rules": [
+    {
+      "ruleId": "architecture.edge-function-imports-sibling",
+      "kind": "import-boundary",
+      "scope": {
+        "paths": [
+          "supabase/functions/**/*.ts"
+        ],
+        "modules": [
+          "edge-functions",
+          "sibling-function-internals"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "An Edge Function crosses the function-isolation boundary by importing a sibling function.",
+      "remediation": "Move shared behavior into supabase/functions/_shared and import it from there.",
+      "adoptionStage": "enforce"
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+name: Blueprint submission
+description: Propose a generalized policy blueprint for the public catalog
+title: "[Blueprint]: "
+labels:
+  - blueprint
+body:
+  - type: textarea
+    id: blueprint
+    attributes:
+      label: Blueprint JSON
+      description: Paste the complete policy-pack JSON document.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: overview
+    attributes:
+      label: Overview
+      description: Explain the reusable architecture and its intended use.
+    validations:
+      required: true
+  - type: textarea
+    id: when-to-avoid
+    attributes:
+      label: When to avoid
+      description: Explain when this blueprint is a poor fit.
+    validations:
+      required: true
+  - type: textarea
+    id: layers
+    attributes:
+      label: Layers
+      description: List the architectural layers and their responsibilities.
+    validations:
+      required: true
+  - type: input
+    id: target-stack
+    attributes:
+      label: Target stack
+      description: Name the generalized runtime, framework, or platform family.
+    validations:
+      required: true
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Privacy consent
+      options:
+        - label: This blueprint contains no code, repository names, URLs, or project-specific evidence
+          required: true

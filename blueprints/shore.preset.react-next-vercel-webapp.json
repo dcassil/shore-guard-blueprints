@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "metadata": {
+    "id": "shore.preset.react-next-vercel-webapp",
+    "name": "React Next Vercel Webapp",
+    "description": "Overview: A Next.js App Router webapp with feature-sliced UI and thin server actions.\nWhen to avoid: Avoid for pure static sites or systems whose backend domain logic belongs in a standalone service.\nLayers: App routing, feature slices, UI components, shared libraries, and server-only dependencies.",
+    "revision": "1.0.0"
+  },
+  "modules": {
+    "pathMappings": {
+      "application": [
+        "app/**/*.{ts,tsx}",
+        "components/**/*.{ts,tsx}",
+        "features/**/*.{ts,tsx}",
+        "lib/**/*.{ts,tsx}",
+        "hooks/**/*.{ts,tsx}"
+      ],
+      "features": [
+        "features/**/*.{ts,tsx}",
+        "@/features/**/*"
+      ],
+      "feature-internals": [
+        "*/features/*/!(index)",
+        "@/features/*/!(index)"
+      ],
+      "server-only": [
+        "server-only"
+      ]
+    },
+    "allowedEdges": [
+      {
+        "from": "application",
+        "to": "features"
+      }
+    ],
+    "forbiddenEdges": [
+      {
+        "from": "application",
+        "to": "feature-internals"
+      },
+      {
+        "from": "application",
+        "to": "server-only"
+      }
+    ]
+  },
+  "rules": [
+    {
+      "ruleId": "architecture.feature-deep-imports",
+      "kind": "import-boundary",
+      "scope": {
+        "paths": [
+          "**/*.{ts,tsx}"
+        ],
+        "modules": [
+          "application",
+          "feature-internals"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "Application code crosses the feature public-entry boundary with a deep feature import.",
+      "remediation": "Export the dependency from the feature public entry and import that entry instead.",
+      "adoptionStage": "enforce"
+    },
+    {
+      "ruleId": "architecture.application-imports-server-only",
+      "kind": "import-boundary",
+      "scope": {
+        "paths": [
+          "**/*.{ts,tsx}"
+        ],
+        "modules": [
+          "application",
+          "server-only"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "A module imports the default server-only marker where the source ESLint policy forbids it.",
+      "remediation": "Remove the marker import or place server-only behavior behind an explicitly server-scoped module.",
+      "adoptionStage": "enforce"
+    }
+  ]
+}

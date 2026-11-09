@@ -1,0 +1,43 @@
+name: Validate blueprints
+
+on:
+  pull_request:
+    paths:
+      - blueprints/*.json
+      - scripts/validate.mjs
+      - .github/workflows/validate.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install policy validator
+        run: |
+          npm install --no-save @shore/guard-policy || {
+            echo "@shore/guard-policy is unavailable from npm; publish it before validating the catalog." >&2
+            exit 1
+          }
+      - name: Validate changed blueprints
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          if [[ -n "${BASE_SHA}" ]]; then
+            mapfile -t files < <(git diff --name-only --diff-filter=ACMR "${BASE_SHA}" HEAD -- 'blueprints/*.json')
+          else
+            mapfile -t files < <(find blueprints -maxdepth 1 -name '*.json' -type f | sort)
+          fi
+          if (( ${#files[@]} == 0 )); then
+            echo "No blueprint JSON files require validation."
+            exit 0
+          fi
+          node scripts/validate.mjs "${files[@]}"

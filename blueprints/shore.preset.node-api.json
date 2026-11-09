@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "metadata": {
+    "id": "shore.preset.node-api",
+    "name": "Node API",
+    "description": "Overview: A framework-agnostic layered HTTP service with transport, domain, persistence, and infrastructure boundaries.\nWhen to avoid: Avoid for render-lifecycle-coupled web applications or pure database CRUD with no domain logic.\nLayers: Application wiring, routes, handlers, services, repositories, infrastructure, and shared support modules.",
+    "revision": "1.0.0"
+  },
+  "modules": {
+    "pathMappings": {
+      "application": [
+        "src/app.ts",
+        "src/server.ts"
+      ],
+      "routes": [
+        "src/routes/**/*.ts"
+      ],
+      "handlers": [
+        "src/handlers/**/*.ts"
+      ],
+      "services": [
+        "src/services/**/*.ts"
+      ],
+      "repositories": [
+        "src/repositories/**/*.ts"
+      ],
+      "infrastructure": [
+        "src/infra/**/*.ts",
+        "src/schemas/**/*.ts",
+        "src/errors/**/*.ts",
+        "src/types/**/*.ts"
+      ],
+      "http-framework": [
+        "fastify",
+        "express",
+        "hono",
+        "@fastify/*",
+        "@hono/*"
+      ]
+    },
+    "allowedEdges": [
+      {
+        "from": "application",
+        "to": "routes"
+      },
+      {
+        "from": "application",
+        "to": "infrastructure"
+      },
+      {
+        "from": "routes",
+        "to": "handlers"
+      },
+      {
+        "from": "handlers",
+        "to": "services"
+      },
+      {
+        "from": "services",
+        "to": "repositories"
+      },
+      {
+        "from": "services",
+        "to": "infrastructure"
+      },
+      {
+        "from": "repositories",
+        "to": "infrastructure"
+      }
+    ],
+    "forbiddenEdges": [
+      {
+        "from": "handlers",
+        "to": "repositories"
+      },
+      {
+        "from": "services",
+        "to": "http-framework"
+      },
+      {
+        "from": "repositories",
+        "to": "http-framework"
+      },
+      {
+        "from": "infrastructure",
+        "to": "http-framework"
+      }
+    ]
+  },
+  "rules": [
+    {
+      "ruleId": "architecture.handlers-bypass-services",
+      "kind": "import-boundary",
+      "scope": {
+        "paths": [
+          "src/handlers/**/*.ts"
+        ],
+        "modules": [
+          "handlers",
+          "repositories"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "The handlers-to-repositories boundary is violated by a direct repository import.",
+      "remediation": "Route persistence access through a service and import that service from the handler.",
+      "adoptionStage": "enforce"
+    },
+    {
+      "ruleId": "architecture.core-imports-http-framework",
+      "kind": "import-boundary",
+      "scope": {
+        "paths": [
+          "src/services/**/*.ts",
+          "src/repositories/**/*.ts",
+          "src/infra/**/*.ts",
+          "src/schemas/**/*.ts",
+          "src/errors/**/*.ts",
+          "src/types/**/*.ts"
+        ],
+        "modules": [
+          "services",
+          "repositories",
+          "infrastructure",
+          "http-framework"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "A framework-agnostic core module imports an HTTP framework package.",
+      "remediation": "Move HTTP framework wiring to the application or routes layer and expose a framework-neutral interface to core code.",
+      "adoptionStage": "enforce"
+    }
+  ]
+}
