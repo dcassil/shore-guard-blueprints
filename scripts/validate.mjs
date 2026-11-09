@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { validate } from '@shore/guard-policy';
+import { validate } from './guard-policy.mjs';
 
 const files = process.argv.slice(2);
 if (files.length === 0) {

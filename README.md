@@ -14,10 +14,9 @@ Submissions contain only generalized schema. Do not include code, repository nam
 
 ## Validate locally
 
-Install the published policy package, then validate one or more files:
+Validate one or more files with the bundled validator (no install needed):
 
 ```sh
-npm install @shore/guard-policy
 node scripts/validate.mjs blueprints/*.json
 ```
 

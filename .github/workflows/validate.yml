@@ -5,6 +5,7 @@ on:
     paths:
       - blueprints/*.json
       - scripts/validate.mjs
+      - scripts/guard-policy.mjs
       - .github/workflows/validate.yml
   workflow_dispatch:
 
@@ -21,12 +22,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Install policy validator
-        run: |
-          npm install --no-save @shore/guard-policy || {
-            echo "@shore/guard-policy is unavailable from npm; publish it before validating the catalog." >&2
-            exit 1
-          }
       - name: Validate changed blueprints
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
