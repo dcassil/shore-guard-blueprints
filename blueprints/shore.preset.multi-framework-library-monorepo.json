@@ -1,0 +1,574 @@
+{
+  "version": 1,
+  "metadata": {
+    "id": "shore.preset.multi-framework-library-monorepo",
+    "name": "Multi-Framework Library Monorepo",
+    "description": "Overview: A workspace monorepo that publishes one framework-agnostic core library plus thin per-framework wrapper packages and a documentation site that consumes them as published.\nWhen to avoid: Avoid for application repositories, for libraries that target a single UI framework, or when each framework package reimplements the behavior instead of wrapping a shared core.\nLayers: Core public entry, core internals, one wrapper package per UI framework, the framework runtime each wrapper binds to, and a documentation site.",
+    "revision": "1.0.0"
+  },
+  "modules": {
+    "pathMappings": {
+      "core-entry": [
+        "packages/core/src/index.ts"
+      ],
+      "core-internals": [
+        "packages/core/src/!(index).{ts,tsx}",
+        "packages/core/src/!(index)/**/*",
+        "../**/core/src/**"
+      ],
+      "angular-wrapper": [
+        "packages/angular/**/*"
+      ],
+      "react-wrapper": [
+        "packages/react/**/*"
+      ],
+      "svelte-wrapper": [
+        "packages/svelte/**/*"
+      ],
+      "vue-wrapper": [
+        "packages/vue/**/*"
+      ],
+      "angular-runtime": [
+        "@angular/*",
+        "@angular/*/**",
+        "**/node_modules/@angular/**"
+      ],
+      "react-runtime": [
+        "react",
+        "react/*",
+        "react-dom",
+        "react-dom/*",
+        "**/node_modules/react/**",
+        "**/node_modules/react-dom/**"
+      ],
+      "svelte-runtime": [
+        "svelte",
+        "svelte/*",
+        "**/node_modules/svelte/**"
+      ],
+      "vue-runtime": [
+        "vue",
+        "vue/*",
+        "@vue/*",
+        "**/node_modules/vue/**",
+        "**/node_modules/@vue/**"
+      ],
+      "docs": [
+        "packages/docs/**/*"
+      ]
+    },
+    "allowedEdges": [
+      {
+        "from": "core-entry",
+        "to": "core-internals"
+      },
+      {
+        "from": "angular-wrapper",
+        "to": "core-entry"
+      },
+      {
+        "from": "angular-wrapper",
+        "to": "angular-runtime"
+      },
+      {
+        "from": "react-wrapper",
+        "to": "core-entry"
+      },
+      {
+        "from": "react-wrapper",
+        "to": "react-runtime"
+      },
+      {
+        "from": "svelte-wrapper",
+        "to": "core-entry"
+      },
+      {
+        "from": "svelte-wrapper",
+        "to": "svelte-runtime"
+      },
+      {
+        "from": "vue-wrapper",
+        "to": "core-entry"
+      },
+      {
+        "from": "vue-wrapper",
+        "to": "vue-runtime"
+      },
+      {
+        "from": "docs",
+        "to": "core-entry"
+      },
+      {
+        "from": "docs",
+        "to": "angular-wrapper"
+      },
+      {
+        "from": "docs",
+        "to": "angular-runtime"
+      },
+      {
+        "from": "docs",
+        "to": "react-wrapper"
+      },
+      {
+        "from": "docs",
+        "to": "react-runtime"
+      },
+      {
+        "from": "docs",
+        "to": "svelte-wrapper"
+      },
+      {
+        "from": "docs",
+        "to": "svelte-runtime"
+      },
+      {
+        "from": "docs",
+        "to": "vue-wrapper"
+      },
+      {
+        "from": "docs",
+        "to": "vue-runtime"
+      }
+    ],
+    "forbiddenEdges": [
+      {
+        "from": "core-entry",
+        "to": "angular-runtime"
+      },
+      {
+        "from": "core-entry",
+        "to": "react-runtime"
+      },
+      {
+        "from": "core-entry",
+        "to": "svelte-runtime"
+      },
+      {
+        "from": "core-entry",
+        "to": "vue-runtime"
+      },
+      {
+        "from": "core-entry",
+        "to": "angular-wrapper"
+      },
+      {
+        "from": "core-entry",
+        "to": "react-wrapper"
+      },
+      {
+        "from": "core-entry",
+        "to": "svelte-wrapper"
+      },
+      {
+        "from": "core-entry",
+        "to": "vue-wrapper"
+      },
+      {
+        "from": "core-entry",
+        "to": "docs"
+      },
+      {
+        "from": "core-internals",
+        "to": "angular-runtime"
+      },
+      {
+        "from": "core-internals",
+        "to": "react-runtime"
+      },
+      {
+        "from": "core-internals",
+        "to": "svelte-runtime"
+      },
+      {
+        "from": "core-internals",
+        "to": "vue-runtime"
+      },
+      {
+        "from": "core-internals",
+        "to": "angular-wrapper"
+      },
+      {
+        "from": "core-internals",
+        "to": "react-wrapper"
+      },
+      {
+        "from": "core-internals",
+        "to": "svelte-wrapper"
+      },
+      {
+        "from": "core-internals",
+        "to": "vue-wrapper"
+      },
+      {
+        "from": "core-internals",
+        "to": "docs"
+      },
+      {
+        "from": "angular-wrapper",
+        "to": "react-wrapper"
+      },
+      {
+        "from": "angular-wrapper",
+        "to": "svelte-wrapper"
+      },
+      {
+        "from": "angular-wrapper",
+        "to": "vue-wrapper"
+      },
+      {
+        "from": "angular-wrapper",
+        "to": "react-runtime"
+      },
+      {
+        "from": "angular-wrapper",
+        "to": "svelte-runtime"
+      },
+      {
+        "from": "angular-wrapper",
+        "to": "vue-runtime"
+      },
+      {
+        "from": "angular-wrapper",
+        "to": "core-internals"
+      },
+      {
+        "from": "angular-wrapper",
+        "to": "docs"
+      },
+      {
+        "from": "react-wrapper",
+        "to": "angular-wrapper"
+      },
+      {
+        "from": "react-wrapper",
+        "to": "svelte-wrapper"
+      },
+      {
+        "from": "react-wrapper",
+        "to": "vue-wrapper"
+      },
+      {
+        "from": "react-wrapper",
+        "to": "angular-runtime"
+      },
+      {
+        "from": "react-wrapper",
+        "to": "svelte-runtime"
+      },
+      {
+        "from": "react-wrapper",
+        "to": "vue-runtime"
+      },
+      {
+        "from": "react-wrapper",
+        "to": "core-internals"
+      },
+      {
+        "from": "react-wrapper",
+        "to": "docs"
+      },
+      {
+        "from": "svelte-wrapper",
+        "to": "angular-wrapper"
+      },
+      {
+        "from": "svelte-wrapper",
+        "to": "react-wrapper"
+      },
+      {
+        "from": "svelte-wrapper",
+        "to": "vue-wrapper"
+      },
+      {
+        "from": "svelte-wrapper",
+        "to": "angular-runtime"
+      },
+      {
+        "from": "svelte-wrapper",
+        "to": "react-runtime"
+      },
+      {
+        "from": "svelte-wrapper",
+        "to": "vue-runtime"
+      },
+      {
+        "from": "svelte-wrapper",
+        "to": "core-internals"
+      },
+      {
+        "from": "svelte-wrapper",
+        "to": "docs"
+      },
+      {
+        "from": "vue-wrapper",
+        "to": "angular-wrapper"
+      },
+      {
+        "from": "vue-wrapper",
+        "to": "react-wrapper"
+      },
+      {
+        "from": "vue-wrapper",
+        "to": "svelte-wrapper"
+      },
+      {
+        "from": "vue-wrapper",
+        "to": "angular-runtime"
+      },
+      {
+        "from": "vue-wrapper",
+        "to": "react-runtime"
+      },
+      {
+        "from": "vue-wrapper",
+        "to": "svelte-runtime"
+      },
+      {
+        "from": "vue-wrapper",
+        "to": "core-internals"
+      },
+      {
+        "from": "vue-wrapper",
+        "to": "docs"
+      },
+      {
+        "from": "docs",
+        "to": "core-internals"
+      }
+    ]
+  },
+  "rules": [
+    {
+      "ruleId": "architecture.core-imports-ui-framework",
+      "kind": "import-boundary",
+      "scope": {
+        "paths": [
+          "packages/core/src/**/*.{ts,tsx}"
+        ],
+        "modules": [
+          "core-internals",
+          "angular-runtime",
+          "react-runtime",
+          "svelte-runtime",
+          "vue-runtime"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "The framework-agnostic core imports a UI framework runtime, so every consumer inherits that framework.",
+      "remediation": "Keep the core on plain language and platform APIs; put framework bindings in that framework wrapper package.",
+      "adoptionStage": "enforce"
+    },
+    {
+      "ruleId": "architecture.core-imports-downstream-packages",
+      "kind": "import-boundary",
+      "scope": {
+        "paths": [
+          "packages/core/src/**/*.{ts,tsx}"
+        ],
+        "modules": [
+          "core-internals",
+          "angular-wrapper",
+          "react-wrapper",
+          "svelte-wrapper",
+          "vue-wrapper",
+          "docs"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "The core imports a wrapper package or the documentation site, inverting the dependency direction.",
+      "remediation": "Move the shared piece into the core and let the wrapper or documentation package import it from there.",
+      "adoptionStage": "enforce"
+    },
+    {
+      "ruleId": "architecture.angular-wrapper-isolation",
+      "kind": "import-boundary",
+      "scope": {
+        "paths": [
+          "packages/angular/src/**/*.{ts,tsx}"
+        ],
+        "modules": [
+          "angular-wrapper",
+          "react-wrapper",
+          "react-runtime",
+          "svelte-wrapper",
+          "svelte-runtime",
+          "vue-wrapper",
+          "vue-runtime",
+          "docs"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "The angular wrapper imports another framework wrapper, another framework runtime, or the documentation site.",
+      "remediation": "Depend only on the core public entry and the framework this wrapper binds to; move anything shared between wrappers into the core.",
+      "adoptionStage": "enforce"
+    },
+    {
+      "ruleId": "architecture.angular-wrapper-core-deep-imports",
+      "kind": "import-boundary",
+      "scope": {
+        "paths": [
+          "packages/angular/src/**/*.{ts,tsx}"
+        ],
+        "modules": [
+          "angular-wrapper",
+          "core-internals"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "The angular wrapper reaches into core source internals instead of the core public entry.",
+      "remediation": "Export the dependency from the core public entry and import the core by its package name.",
+      "adoptionStage": "enforce"
+    },
+    {
+      "ruleId": "architecture.react-wrapper-isolation",
+      "kind": "import-boundary",
+      "scope": {
+        "paths": [
+          "packages/react/src/**/*.{ts,tsx}"
+        ],
+        "modules": [
+          "react-wrapper",
+          "angular-wrapper",
+          "angular-runtime",
+          "svelte-wrapper",
+          "svelte-runtime",
+          "vue-wrapper",
+          "vue-runtime",
+          "docs"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "The react wrapper imports another framework wrapper, another framework runtime, or the documentation site.",
+      "remediation": "Depend only on the core public entry and the framework this wrapper binds to; move anything shared between wrappers into the core.",
+      "adoptionStage": "enforce"
+    },
+    {
+      "ruleId": "architecture.react-wrapper-core-deep-imports",
+      "kind": "import-boundary",
+      "scope": {
+        "paths": [
+          "packages/react/src/**/*.{ts,tsx}"
+        ],
+        "modules": [
+          "react-wrapper",
+          "core-internals"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "The react wrapper reaches into core source internals instead of the core public entry.",
+      "remediation": "Export the dependency from the core public entry and import the core by its package name.",
+      "adoptionStage": "enforce"
+    },
+    {
+      "ruleId": "architecture.svelte-wrapper-isolation",
+      "kind": "import-boundary",
+      "scope": {
+        "paths": [
+          "packages/svelte/src/**/*.{ts,tsx}"
+        ],
+        "modules": [
+          "svelte-wrapper",
+          "angular-wrapper",
+          "angular-runtime",
+          "react-wrapper",
+          "react-runtime",
+          "vue-wrapper",
+          "vue-runtime",
+          "docs"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "The svelte wrapper imports another framework wrapper, another framework runtime, or the documentation site.",
+      "remediation": "Depend only on the core public entry and the framework this wrapper binds to; move anything shared between wrappers into the core.",
+      "adoptionStage": "enforce"
+    },
+    {
+      "ruleId": "architecture.svelte-wrapper-core-deep-imports",
+      "kind": "import-boundary",
+      "scope": {
+        "paths": [
+          "packages/svelte/src/**/*.{ts,tsx}"
+        ],
+        "modules": [
+          "svelte-wrapper",
+          "core-internals"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "The svelte wrapper reaches into core source internals instead of the core public entry.",
+      "remediation": "Export the dependency from the core public entry and import the core by its package name.",
+      "adoptionStage": "enforce"
+    },
+    {
+      "ruleId": "architecture.vue-wrapper-isolation",
+      "kind": "import-boundary",
+      "scope": {
+        "paths": [
+          "packages/vue/src/**/*.{ts,tsx}"
+        ],
+        "modules": [
+          "vue-wrapper",
+          "angular-wrapper",
+          "angular-runtime",
+          "react-wrapper",
+          "react-runtime",
+          "svelte-wrapper",
+          "svelte-runtime",
+          "docs"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "The vue wrapper imports another framework wrapper, another framework runtime, or the documentation site.",
+      "remediation": "Depend only on the core public entry and the framework this wrapper binds to; move anything shared between wrappers into the core.",
+      "adoptionStage": "enforce"
+    },
+    {
+      "ruleId": "architecture.vue-wrapper-core-deep-imports",
+      "kind": "import-boundary",
+      "scope": {
+        "paths": [
+          "packages/vue/src/**/*.{ts,tsx}"
+        ],
+        "modules": [
+          "vue-wrapper",
+          "core-internals"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "The vue wrapper reaches into core source internals instead of the core public entry.",
+      "remediation": "Export the dependency from the core public entry and import the core by its package name.",
+      "adoptionStage": "enforce"
+    },
+    {
+      "ruleId": "architecture.docs-core-deep-imports",
+      "kind": "import-boundary",
+      "scope": {
+        "paths": [
+          "packages/docs/**/*.{ts,tsx}"
+        ],
+        "modules": [
+          "docs",
+          "core-internals"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "The documentation site reaches into core source internals instead of consuming the core as published.",
+      "remediation": "Export the dependency from the core public entry and import the core by its package name.",
+      "adoptionStage": "enforce"
+    },
+    {
+      "ruleId": "architecture.package-cycles",
+      "kind": "no-cycles",
+      "scope": {
+        "paths": [
+          "packages/*/src/**/*.{ts,tsx}"
+        ]
+      },
+      "severity": "error",
+      "diagnostic": "An import cycle exists inside or between workspace packages.",
+      "remediation": "Break the cycle by extracting the shared piece into the core or by inverting one dependency through an interface.",
+      "adoptionStage": "warn"
+    }
+  ]
+}

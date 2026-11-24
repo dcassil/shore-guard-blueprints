@@ -20231,12 +20231,135 @@ var viteClientSideWebappPreset = {
     }
   ]
 };
+var WRAPPER_FRAMEWORKS = ["angular", "react", "svelte", "vue"];
+var wrapperModule = (framework) => `${framework}-wrapper`;
+var runtimeModule = (framework) => `${framework}-runtime`;
+var otherFrameworks = (framework) => WRAPPER_FRAMEWORKS.filter((candidate) => candidate !== framework);
+var wrapperSourcePath = (framework) => `packages/${framework}/src/**/*.{ts,tsx}`;
+var CORE_MODULES = ["core-entry", "core-internals"];
+var RUNTIME_PACKAGES = {
+  angular: ["@angular/*", "@angular/*/**", "**/node_modules/@angular/**"],
+  react: ["react", "react/*", "react-dom", "react-dom/*", "**/node_modules/react/**", "**/node_modules/react-dom/**"],
+  svelte: ["svelte", "svelte/*", "**/node_modules/svelte/**"],
+  vue: ["vue", "vue/*", "@vue/*", "**/node_modules/vue/**", "**/node_modules/@vue/**"]
+};
+var multiFrameworkLibraryMonorepoPreset = {
+  version: 1,
+  metadata: {
+    id: "shore.preset.multi-framework-library-monorepo",
+    name: "Multi-Framework Library Monorepo",
+    description: catalogDescription(
+      "A workspace monorepo that publishes one framework-agnostic core library plus thin per-framework wrapper packages and a documentation site that consumes them as published.",
+      "Avoid for application repositories, for libraries that target a single UI framework, or when each framework package reimplements the behavior instead of wrapping a shared core.",
+      "Core public entry, core internals, one wrapper package per UI framework, the framework runtime each wrapper binds to, and a documentation site."
+    ),
+    revision: "1.0.0"
+  },
+  modules: {
+    pathMappings: {
+      "core-entry": ["packages/core/src/index.ts"],
+      "core-internals": ["packages/core/src/!(index).{ts,tsx}", "packages/core/src/!(index)/**/*", "../**/core/src/**"],
+      ...Object.fromEntries(WRAPPER_FRAMEWORKS.map((framework) => [wrapperModule(framework), [`packages/${framework}/**/*`]])),
+      ...Object.fromEntries(WRAPPER_FRAMEWORKS.map((framework) => [runtimeModule(framework), RUNTIME_PACKAGES[framework]])),
+      docs: ["packages/docs/**/*"]
+    },
+    allowedEdges: [
+      { from: "core-entry", to: "core-internals" },
+      ...WRAPPER_FRAMEWORKS.flatMap((framework) => [
+        { from: wrapperModule(framework), to: "core-entry" },
+        { from: wrapperModule(framework), to: runtimeModule(framework) }
+      ]),
+      { from: "docs", to: "core-entry" },
+      ...WRAPPER_FRAMEWORKS.flatMap((framework) => [
+        { from: "docs", to: wrapperModule(framework) },
+        { from: "docs", to: runtimeModule(framework) }
+      ])
+    ],
+    forbiddenEdges: [
+      ...CORE_MODULES.flatMap((core) => [
+        ...WRAPPER_FRAMEWORKS.map((framework) => ({ from: core, to: runtimeModule(framework) })),
+        ...WRAPPER_FRAMEWORKS.map((framework) => ({ from: core, to: wrapperModule(framework) })),
+        { from: core, to: "docs" }
+      ]),
+      ...WRAPPER_FRAMEWORKS.flatMap((framework) => [
+        ...otherFrameworks(framework).map((other) => ({ from: wrapperModule(framework), to: wrapperModule(other) })),
+        ...otherFrameworks(framework).map((other) => ({ from: wrapperModule(framework), to: runtimeModule(other) })),
+        { from: wrapperModule(framework), to: "core-internals" },
+        { from: wrapperModule(framework), to: "docs" }
+      ]),
+      { from: "docs", to: "core-internals" }
+    ]
+  },
+  rules: [
+    {
+      ruleId: "architecture.core-imports-ui-framework",
+      kind: "import-boundary",
+      scope: { paths: ["packages/core/src/**/*.{ts,tsx}"], modules: ["core-internals", ...WRAPPER_FRAMEWORKS.map(runtimeModule)] },
+      severity: "error",
+      diagnostic: "The framework-agnostic core imports a UI framework runtime, so every consumer inherits that framework.",
+      remediation: "Keep the core on plain language and platform APIs; put framework bindings in that framework wrapper package.",
+      adoptionStage: "enforce"
+    },
+    {
+      ruleId: "architecture.core-imports-downstream-packages",
+      kind: "import-boundary",
+      scope: { paths: ["packages/core/src/**/*.{ts,tsx}"], modules: ["core-internals", ...WRAPPER_FRAMEWORKS.map(wrapperModule), "docs"] },
+      severity: "error",
+      diagnostic: "The core imports a wrapper package or the documentation site, inverting the dependency direction.",
+      remediation: "Move the shared piece into the core and let the wrapper or documentation package import it from there.",
+      adoptionStage: "enforce"
+    },
+    // Each wrapper's rules share one path scope so the ESLint renderer merges them into a single fragment.
+    ...WRAPPER_FRAMEWORKS.flatMap((framework) => [
+      {
+        ruleId: `architecture.${framework}-wrapper-isolation`,
+        kind: "import-boundary",
+        scope: {
+          paths: [wrapperSourcePath(framework)],
+          modules: [wrapperModule(framework), ...otherFrameworks(framework).flatMap((other) => [wrapperModule(other), runtimeModule(other)]), "docs"]
+        },
+        severity: "error",
+        diagnostic: `The ${framework} wrapper imports another framework wrapper, another framework runtime, or the documentation site.`,
+        remediation: "Depend only on the core public entry and the framework this wrapper binds to; move anything shared between wrappers into the core.",
+        adoptionStage: "enforce"
+      },
+      {
+        ruleId: `architecture.${framework}-wrapper-core-deep-imports`,
+        kind: "import-boundary",
+        scope: { paths: [wrapperSourcePath(framework)], modules: [wrapperModule(framework), "core-internals"] },
+        severity: "error",
+        diagnostic: `The ${framework} wrapper reaches into core source internals instead of the core public entry.`,
+        remediation: "Export the dependency from the core public entry and import the core by its package name.",
+        adoptionStage: "enforce"
+      }
+    ]),
+    {
+      ruleId: "architecture.docs-core-deep-imports",
+      kind: "import-boundary",
+      scope: { paths: ["packages/docs/**/*.{ts,tsx}"], modules: ["docs", "core-internals"] },
+      severity: "error",
+      diagnostic: "The documentation site reaches into core source internals instead of consuming the core as published.",
+      remediation: "Export the dependency from the core public entry and import the core by its package name.",
+      adoptionStage: "enforce"
+    },
+    {
+      ruleId: "architecture.package-cycles",
+      kind: "no-cycles",
+      scope: { paths: ["packages/*/src/**/*.{ts,tsx}"] },
+      severity: "error",
+      diagnostic: "An import cycle exists inside or between workspace packages.",
+      remediation: "Break the cycle by extracting the shared piece into the core or by inverting one dependency through an interface.",
+      adoptionStage: "warn"
+    }
+  ]
+};
 var policyPresets = [
   nodeApiPreset,
   reactNextVercelWebappPreset,
   supabaseApiPreset,
   supabaseNodeRagPreset,
-  viteClientSideWebappPreset
+  viteClientSideWebappPreset,
+  multiFrameworkLibraryMonorepoPreset
 ];
 
 // ../policy/src/proposal.ts
@@ -20477,6 +20600,7 @@ export {
   hash,
   isKnownRuleKind,
   isStrongBlueprint,
+  multiFrameworkLibraryMonorepoPreset,
   nodeApiPreset,
   policyLockSchema,
   policyPackJsonSchema,
